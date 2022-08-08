@@ -36,7 +36,56 @@ class _Screen2State extends State<Screen2> {
           ),
         ),
       ),
-      body: Container(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          RadioListTile<int>(
+            value: 0,
+            title: const Text('Male'),
+            groupValue: selectedValue,
+            activeColor: darkWaterColor,
+            onChanged: (value) {
+              setState(() {
+                selectedValue = 0;
+              });
+            },
+          ),
+          RadioListTile<int>(
+            value: 1,
+            title: const Text('Female'),
+            groupValue: selectedValue,
+            activeColor: darkWaterColor,
+            onChanged: (value) {
+              setState(() {
+                selectedValue = 1;
+              });
+            },
+          ),
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10.0, vertical: 20.0),
+            child: Material(
+              color: darkWaterColor,
+              borderRadius: BorderRadius.circular(30.0),
+              clipBehavior: Clip.antiAlias,
+              child: MaterialButton(
+                onPressed: () {
+                  //Add path here
+                },
+                height: 45.0,
+                minWidth: double.infinity,
+                color: darkWaterColor,
+                child: Text(
+                  'Continue',
+                  style: TextStyle(
+                    color: whiteColor,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
