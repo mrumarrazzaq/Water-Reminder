@@ -1,20 +1,31 @@
-import 'package:flutter/material.dart';
-import 'package:water_reminder/colors.dart';
+import 'dart:developer';
 
-import 'setting_screen.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_chat_bubble/bubble_type.dart';
+import 'package:flutter_chat_bubble/chat_bubble.dart';
+import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_4.dart';
+import 'package:water_reminder/colors.dart';
+import 'package:water_reminder/constants.dart';
+import 'package:water_reminder/style.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
-  final tabs = [
-    Scaffold(),
-    Scaffold(),
-  ];
+  DateTime _selectedDateTime = DateTime.now();
+  String _selectedDateToString = '';
+  bool _isTipVisible = false;
+  delay() {
+    Future.delayed(
+      Duration(milliseconds: 10000),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,41 +34,369 @@ class _HomeScreenState extends State<HomeScreen> {
         elevation: 0.5,
         centerTitle: true,
         title: Text(
-          _currentIndex == 0 ? 'Home' : 'Setting',
+          'Home',
           style: TextStyle(color: blackColor),
         ),
         leading: const Text(''),
       ),
-      body: tabs[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: darkWaterColor,
-        elevation: 10.0,
-        currentIndex: _currentIndex,
-        selectedLabelStyle: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w500,
-        ),
-        selectedItemColor: whiteColor,
-        unselectedItemColor: greyColor,
-        unselectedLabelStyle: const TextStyle(fontFamily: 'SourceSansPro'),
-        selectedFontSize: 10.0,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_filled),
-            label: 'Home',
+      body: Column(
+        children: [
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 5.0),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      if (_isTipVisible == false)
+                        _isTipVisible = true;
+                      else if (_isTipVisible == true) _isTipVisible = false;
+                    });
+                  },
+                  child: Image.asset(
+                    'assets/water_drop.png',
+                    width: 128 / 2.5,
+                    height: 132 / 2.5,
+                  ),
+                ),
+                Visibility(
+                  visible: _isTipVisible,
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: ChatBubble(
+                      clipper:
+                          ChatBubbleClipper4(type: BubbleType.receiverBubble),
+                      alignment: Alignment.topRight,
+                      margin: const EdgeInsets.only(top: 5),
+                      backGroundColor: lightWaterColor,
+                      child: Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                        child: const Text(
+                          'Do not drink cold water immediately after hot water.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Setting',
+          Card(
+            elevation: 2.0,
+            margin: margin,
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Flexible(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Image.asset(
+                            'assets/drink.png',
+                            width: 85.3 / 3,
+                            height: 85.3 / 3,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: Text('Ideal Water Intake'),
+                          ),
+                          const Text('2810ml', style: boldBlackTextStyle),
+                        ],
+                      ),
+                    ),
+                    VerticalDivider(color: darkWaterColor, width: 5.0),
+                    Flexible(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          Image.asset(
+                            'assets/trophy.png',
+                            width: 85.3 / 3,
+                            height: 85.3 / 3,
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 5.0),
+                            child: Text('Ideal Water Intake'),
+                          ),
+                          const Text('2400ml', style: boldBlackTextStyle),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Card(
+            elevation: 2.0,
+            margin: margin,
+            child: Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Stack(
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Container(
+                        width: 100,
+                        height: 200,
+                        decoration: BoxDecoration(
+                          color: lightWaterColor.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                      ),
+                      Container(
+                        width: 100,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          // color: darkWaterColor,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              lightWaterColor,
+                              darkWaterColor,
+                            ],
+                          ),
+                          borderRadius: const BorderRadius.only(
+                            bottomLeft: Radius.circular(5.0),
+                            bottomRight: Radius.circular(5.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          text: '', // default text style
+                          children: <TextSpan>[
+                            TextSpan(
+                              text: '800',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: darkWaterColor,
+                                  fontSize: 35.0),
+                            ),
+                            TextSpan(
+                              text: '/2600',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: blackColor,
+                                  fontSize: 35.0),
+                            ),
+                            TextSpan(
+                              text: 'ml',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: blackColor,
+                                  textBaseline: TextBaseline.alphabetic),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10.0),
+                        child: Container(
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.5,
+                            ),
+                            child: const Text(
+                                'You have completed 30% of Daily Target.')),
+                      ),
+                      Material(
+                        color: darkWaterColor,
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(10.0),
+                        child: MaterialButton(
+                          onPressed: () {
+                            openDialog();
+                          },
+                          color: darkWaterColor,
+                          minWidth: 150.0,
+                          height: 50.0,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Image.asset('assets/glass_of_water.png',
+                                  height: 20.0, width: 20.0, color: whiteColor),
+                              const SizedBox(width: 8.0),
+                              Text(
+                                'Add 255ml',
+                                style: TextStyle(color: whiteColor),
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Card(
+              elevation: 2.0,
+              margin: margin,
+              child: Column(
+                children: [
+                  const Text(
+                    'Today\'s Record',
+                    style: boldBlackTextStyle,
+                  ),
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
+                      children: [
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                        ListTile(
+                          leading: Image.asset('assets/glass_of_water.png',
+                              height: 20.0, width: 20.0),
+                          title: const Text(
+                            '250 ml',
+                            style: boldBlackTextStyle,
+                          ),
+                          trailing: const Text('2:30 pm'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
       ),
     );
   }
+
+  openDialog() => showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) {
+            var width = MediaQuery.of(context).size.width;
+            return AlertDialog(
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              contentPadding: const EdgeInsets.only(top: 10.0),
+              title: Center(
+                  child: Image.asset(
+                'assets/alarm.png',
+                width: 50.0,
+                height: 50.0,
+              )),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: width,
+                  height: 180.0,
+                  child: Center(
+                      child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      SizedBox(
+                        height: 70,
+                        child: CupertinoTheme(
+                          data: const CupertinoThemeData(
+                              brightness: Brightness.light),
+                          child: CupertinoDatePicker(
+                            initialDateTime: DateTime.now(),
+                            mode: CupertinoDatePickerMode.time,
+                            onDateTimeChanged: (time) {
+                              setState(() {
+                                _selectedDateTime = time;
+                                if (_selectedDateTime.hour > 12) {
+                                  _selectedDateToString =
+                                      '${_selectedDateTime.hour} : ${_selectedDateTime.minute} PM';
+                                } else {
+                                  _selectedDateToString =
+                                      '${_selectedDateTime.hour} : ${_selectedDateTime.minute} AM';
+                                }
+                                log('Selected Time : $_selectedDateToString');
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      Material(
+                        color: lightWaterColor,
+                        clipBehavior: Clip.antiAlias,
+                        borderRadius: BorderRadius.circular(15.0),
+                        child: MaterialButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          color: lightWaterColor,
+                          minWidth: 150.0,
+                          height: 50.0,
+                          child: Text(
+                            'Save',
+                            style: TextStyle(color: whiteColor),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
+                ),
+              ),
+            );
+          },
+        ),
+      );
 }

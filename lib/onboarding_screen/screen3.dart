@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'package:water_reminder/screens/home_screen.dart';
-
+import 'package:water_reminder/screens/dash_board.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -138,7 +136,7 @@ class _Screen3State extends State<Screen3> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
+                          builder: (context) => const DashBoard(),
                         ),
                       );
                     }
