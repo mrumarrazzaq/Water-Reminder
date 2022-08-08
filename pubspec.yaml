@@ -16,6 +16,17 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.2
+  smooth_page_indicator: ^1.0.0+2
+#  #Fire Base
+#  firebase_core: ^1.17.1
+#  firebase_auth: ^3.3.7
+#  cloud_firestore: ^3.1.8
+  #Google Fonts
+  google_fonts: ^3.0.1
+  #For Shared Preferences
+  flutter_secure_storage: ^5.0.2
+  #Flutter toasts
+  fluttertoast: ^8.0.9
 
 dev_dependencies:
   flutter_test:
