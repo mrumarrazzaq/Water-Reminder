@@ -70,7 +70,12 @@ class _Screen2State extends State<Screen2> {
               clipBehavior: Clip.antiAlias,
               child: MaterialButton(
                 onPressed: () {
-                  //Add path here
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const Screen3(),
+                    ),
+                  );
                 },
                 height: 45.0,
                 minWidth: double.infinity,

@@ -89,7 +89,12 @@ class _Screen1State extends State<Screen1> {
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _weightController.clear();
-                    //Add path here
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const Screen2(),
+                      ),
+                    );
                   }
                 },
                 height: 45.0,

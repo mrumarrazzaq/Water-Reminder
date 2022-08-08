@@ -135,7 +135,12 @@ class _Screen3State extends State<Screen3> {
                     if (_formKey.currentState!.validate()) {
                       _wakeTimeController.clear();
                       _bedTimeController.clear();
-                      //Add path here
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
                     }
                   },
                   height: 45.0,
