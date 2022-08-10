@@ -1,11 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:water_reminder/colors.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:water_reminder/constants.dart';
 
-import 'screen2.dart';
+import 'onboarding_screen2.dart';
 
 class Screen1 extends StatefulWidget {
   const Screen1({Key? key}) : super(key: key);
@@ -86,13 +90,17 @@ class _Screen1State extends State<Screen1> {
               borderRadius: BorderRadius.circular(30.0),
               clipBehavior: Clip.antiAlias,
               child: MaterialButton(
-                onPressed: () {
+                onPressed: () async {
                   if (_formKey.currentState!.validate()) {
-                    _weightController.clear();
+                    if (kDebugMode) {
+                      print(_weightController.text);
+                    }
+                    await storage.write(
+                        key: 'weight', value: _weightController.text);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const Screen2(),
+                        builder: (context) => Screen2(),
                       ),
                     );
                   }

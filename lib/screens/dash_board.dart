@@ -21,7 +21,7 @@ class _DashBoardState extends State<DashBoard> {
     return Scaffold(
       body: tabs[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: darkWaterColor,
+        backgroundColor: lightWaterColor,
         elevation: 10.0,
         currentIndex: _currentIndex,
         selectedLabelStyle: const TextStyle(
@@ -29,7 +29,7 @@ class _DashBoardState extends State<DashBoard> {
           fontWeight: FontWeight.w500,
         ),
         selectedItemColor: whiteColor,
-        unselectedItemColor: greyColor,
+        unselectedItemColor: blackColor,
         unselectedLabelStyle: const TextStyle(fontFamily: 'SourceSansPro'),
         selectedFontSize: 10.0,
         type: BottomNavigationBarType.fixed,

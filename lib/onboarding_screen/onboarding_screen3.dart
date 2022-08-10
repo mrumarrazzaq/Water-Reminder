@@ -1,10 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:water_reminder/screens/dash_board.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:water_reminder/constants.dart';
 
 class Screen3 extends StatefulWidget {
-  const Screen3({Key? key}) : super(key: key);
+  Screen3({Key? key}) : super(key: key);
 
   @override
   State<Screen3> createState() => _Screen3State();
@@ -15,6 +20,7 @@ class _Screen3State extends State<Screen3> {
   final TextEditingController _bedTimeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DateTime _selectedTime = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,8 +135,16 @@ class _Screen3State extends State<Screen3> {
                 borderRadius: BorderRadius.circular(30.0),
                 clipBehavior: Clip.antiAlias,
                 child: MaterialButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
+                      print(_wakeTimeController.text);
+                      print(_bedTimeController.text);
+                      await storage.write(
+                          key: 'wakeTime', value: _wakeTimeController.text);
+                      await storage.write(
+                          key: 'bedTime', value: _bedTimeController.text);
+                      await storage.write(key: 'uid', value: 'true');
+
                       _wakeTimeController.clear();
                       _bedTimeController.clear();
                       Navigator.pushReplacement(

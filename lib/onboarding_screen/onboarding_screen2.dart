@@ -1,13 +1,17 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:water_reminder/colors.dart';
 
 import 'package:google_fonts/google_fonts.dart';
+import 'package:water_reminder/constants.dart';
 
-import 'screen3.dart';
+import 'onboarding_screen3.dart';
 
 class Screen2 extends StatefulWidget {
-  const Screen2({Key? key}) : super(key: key);
+  Screen2({Key? key}) : super(key: key);
 
   @override
   State<Screen2> createState() => _Screen2State();
@@ -69,11 +73,17 @@ class _Screen2State extends State<Screen2> {
               borderRadius: BorderRadius.circular(30.0),
               clipBehavior: Clip.antiAlias,
               child: MaterialButton(
-                onPressed: () {
+                onPressed: () async {
+                  String gender;
+                  selectedValue == 0 ? gender = 'Male' : gender = 'Female';
+                  if (kDebugMode) {
+                    print(gender);
+                  }
+                  await storage.write(key: 'gender', value: gender);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const Screen3(),
+                      builder: (context) => Screen3(),
                     ),
                   );
                 },

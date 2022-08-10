@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:water_reminder/constants.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
@@ -15,7 +17,42 @@ class _SettingScreenState extends State<SettingScreen> {
   final TextEditingController _bedTimeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DateTime _selectedTime = DateTime.now();
-  int selectedValue = 0;
+  int selectedGenderValue = 0;
+  String previousWeightValue = '';
+  int previousGenderValue = 0;
+  String previousWakeTimeValue = '';
+  String previousBedTimeValue = '';
+  bool isUserChangeData = false;
+  readUserData() async {
+    if (kDebugMode) {
+      print('Fetching user data');
+    }
+    String? weight = await storage.read(key: 'weight');
+    String? gender = await storage.read(key: 'gender');
+    String? wakeTime = await storage.read(key: 'wakeTime');
+    String? bedTime = await storage.read(key: 'bedTime');
+    setState(() {
+      _weightController.text = weight!;
+      previousWeightValue = weight;
+      if (gender == 'Male') {
+        selectedGenderValue = 0;
+        previousGenderValue = 0;
+      } else {
+        selectedGenderValue = 1;
+        previousGenderValue = 1;
+      }
+      _wakeTimeController.text = wakeTime!;
+      previousWakeTimeValue = wakeTime;
+      _bedTimeController.text = bedTime!;
+      previousBedTimeValue = bedTime;
+    });
+  }
+
+  @override
+  void initState() {
+    readUserData();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,22 +136,22 @@ class _SettingScreenState extends State<SettingScreen> {
                   RadioListTile<int>(
                     value: 0,
                     title: const Text('Male'),
-                    groupValue: selectedValue,
+                    groupValue: selectedGenderValue,
                     activeColor: darkWaterColor,
                     onChanged: (value) {
                       setState(() {
-                        selectedValue = 0;
+                        selectedGenderValue = 0;
                       });
                     },
                   ),
                   RadioListTile<int>(
                     value: 1,
                     title: const Text('Female'),
-                    groupValue: selectedValue,
+                    groupValue: selectedGenderValue,
                     activeColor: darkWaterColor,
                     onChanged: (value) {
                       setState(() {
-                        selectedValue = 1;
+                        selectedGenderValue = 1;
                       });
                     },
                   ),
@@ -222,7 +259,40 @@ class _SettingScreenState extends State<SettingScreen> {
                 clipBehavior: Clip.antiAlias,
                 borderRadius: BorderRadius.circular(30.0),
                 child: MaterialButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    if (_weightController.text != previousWeightValue) {
+                      await storage.write(
+                          key: 'weight', value: _weightController.text);
+                      isUserChangeData = true;
+                    }
+                    if (selectedGenderValue != previousGenderValue) {
+                      String gender = '';
+                      selectedGenderValue == 0 ? gender = 'Male' : 'Female';
+                      await storage.write(key: 'gender', value: gender);
+                      isUserChangeData = true;
+                    }
+                    if (_wakeTimeController.text != previousWakeTimeValue) {
+                      await storage.write(
+                          key: 'wakeTime', value: _wakeTimeController.text);
+                      isUserChangeData = true;
+                    }
+                    if (_bedTimeController.text != previousBedTimeValue) {
+                      await storage.write(
+                          key: 'bedTime', value: _bedTimeController.text);
+                      isUserChangeData = true;
+                    }
+                    print('----------------------------');
+                    print(isUserChangeData);
+                    if (isUserChangeData) {
+                      await Fluttertoast.showToast(
+                        msg: 'Changes Save Successfully', // message
+                        toastLength: Toast.LENGTH_SHORT, // length
+                        gravity: ToastGravity.BOTTOM, // location
+                        backgroundColor: Colors.green,
+                        timeInSecForIosWeb: 1,
+                      );
+                    }
+                  },
                   color: lightWaterColor,
                   minWidth: double.infinity,
                   height: 50.0,

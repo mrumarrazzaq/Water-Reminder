@@ -5,8 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_4.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:water_reminder/constants.dart';
+import 'package:flutter_swipe_action_cell/core/cell.dart';
+import 'package:water_reminder/sql_database/sql_helper.dart';
 import 'package:water_reminder/style.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,12 +21,42 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDateTime = DateTime.now();
-  String _selectedDateToString = '';
+  String _selectedDateTimeToString = '';
   bool _isTipVisible = false;
-  delay() {
-    Future.delayed(
-      Duration(milliseconds: 10000),
-    );
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _dataCollection = [];
+
+  // void _refreshData() async {
+  //   final data = await SQLHelper.getRecords();
+  //   setState(() {
+  //     _dataCollection = data;
+  //     _isLoading = false;
+  //   });
+  // }
+  //
+  // Future<void> _addWaterGlass({required String time}) async {
+  //   await SQLHelper.createRecord(time: time);
+  //   _refreshData();
+  // }
+  //
+  // Future<void> _updateWaterGlass(
+  //     {required int id, required String time}) async {
+  //   await SQLHelper.updateRecord(id: id, time: time);
+  //   _refreshData();
+  // }
+  //
+  // Future<void> _deleteWaterGlass(int id) async {
+  //   await SQLHelper.deleteRecord(id);
+  //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+  //     content: Text('Record Deleted Successfully'),
+  //   ));
+  //   _refreshData();
+  // }
+
+  @override
+  void initState() {
+    // _refreshData();
+    super.initState();
   }
 
   @override
@@ -49,9 +82,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      if (_isTipVisible == false)
+                      if (_isTipVisible == false) {
                         _isTipVisible = true;
-                      else if (_isTipVisible == true) _isTipVisible = false;
+                      } else if (_isTipVisible == true) {
+                        _isTipVisible = false;
+                      }
                     });
                   },
                   child: Image.asset(
@@ -216,14 +251,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 'You have completed 30% of Daily Target.')),
                       ),
                       Material(
-                        color: darkWaterColor,
+                        color: lightWaterColor,
                         clipBehavior: Clip.antiAlias,
                         borderRadius: BorderRadius.circular(10.0),
                         child: MaterialButton(
                           onPressed: () {
-                            openDialog();
+                            openDialog(null);
                           },
-                          color: darkWaterColor,
+                          color: lightWaterColor,
                           minWidth: 150.0,
                           height: 50.0,
                           child: Row(
@@ -233,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   height: 20.0, width: 20.0, color: whiteColor),
                               const SizedBox(width: 8.0),
                               Text(
-                                'Add 255ml',
+                                'Add 250ml',
                                 style: TextStyle(color: whiteColor),
                               )
                             ],
@@ -258,65 +293,68 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: boldBlackTextStyle,
                   ),
                   Expanded(
-                    child: ListView(
-                      shrinkWrap: true,
-                      children: [
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
+                    child: _isLoading
+                        ? Center(
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2.0, color: lightWaterColor),
+                          )
+                        : ListView.builder(
+                            itemCount: _dataCollection.length,
+                            itemBuilder: (context, index) {
+                              print(
+                                  '_dataCollection.length ${_dataCollection.length}');
+                              return _dataCollection.isEmpty
+                                  ? const Text('No record added')
+                                  : SwipeActionCell(
+                                      key: ObjectKey(
+                                          _dataCollection[index]['createdAt']),
+                                      leadingActions: [
+                                        SwipeAction(
+                                          title: "Edit",
+                                          style: TextStyle(
+                                              fontSize: 12, color: whiteColor),
+                                          color: Colors.green,
+                                          icon: Icon(Icons.edit,
+                                              color: whiteColor),
+                                          onTap: (CompletionHandler
+                                              handler) async {
+                                            openDialog(
+                                                _dataCollection[index]['id']);
+                                            setState(() {});
+                                          },
+                                        ),
+                                      ],
+                                      trailingActions: [
+                                        SwipeAction(
+                                          title: "Delete",
+                                          style: TextStyle(
+                                              fontSize: 12, color: whiteColor),
+                                          color: Colors.red,
+                                          icon: Icon(Icons.delete,
+                                              color: whiteColor),
+                                          onTap: (CompletionHandler
+                                              handler) async {
+                                            openDeleteDialog(
+                                                _dataCollection[index]['id']);
+                                            setState(() {});
+                                          },
+                                        ),
+                                      ],
+                                      child: ListTile(
+                                        leading: Image.asset(
+                                            'assets/glass_of_water.png',
+                                            height: 20.0,
+                                            width: 20.0),
+                                        title: const Text(
+                                          '250 ml',
+                                          style: boldBlackTextStyle,
+                                        ),
+                                        trailing: Text(
+                                            _dataCollection[index]['time']),
+                                      ),
+                                    );
+                            },
                           ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
-                          ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
-                          ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
-                          ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
-                          ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                        ListTile(
-                          leading: Image.asset('assets/glass_of_water.png',
-                              height: 20.0, width: 20.0),
-                          title: const Text(
-                            '250 ml',
-                            style: boldBlackTextStyle,
-                          ),
-                          trailing: const Text('2:30 pm'),
-                        ),
-                      ],
-                    ),
                   ),
                 ],
               ),
@@ -327,10 +365,17 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  openDialog() => showDialog(
+  openDialog(int? id) => showDialog(
         context: context,
         builder: (context) => StatefulBuilder(
           builder: (context, setState) {
+            if (_selectedDateTime.hour > 12) {
+              _selectedDateTimeToString =
+                  '${_selectedDateTime.hour - 12} : ${_selectedDateTime.minute} PM';
+            } else {
+              _selectedDateTimeToString =
+                  '${_selectedDateTime.hour} : ${_selectedDateTime.minute} AM';
+            }
             var width = MediaQuery.of(context).size.width;
             return AlertDialog(
               shape: const RoundedRectangleBorder(
@@ -362,13 +407,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               setState(() {
                                 _selectedDateTime = time;
                                 if (_selectedDateTime.hour > 12) {
-                                  _selectedDateToString =
-                                      '${_selectedDateTime.hour} : ${_selectedDateTime.minute} PM';
+                                  _selectedDateTimeToString =
+                                      '${_selectedDateTime.hour - 12} : ${_selectedDateTime.minute} PM';
                                 } else {
-                                  _selectedDateToString =
+                                  _selectedDateTimeToString =
                                       '${_selectedDateTime.hour} : ${_selectedDateTime.minute} AM';
                                 }
-                                log('Selected Time : $_selectedDateToString');
+                                log('Selected Time : $_selectedDateTimeToString');
                               });
                             },
                           ),
@@ -380,13 +425,19 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(15.0),
                         child: MaterialButton(
                           onPressed: () {
+                            if (id == null) {
+                              // _addWaterGlass(time: _selectedDateTimeToString);
+                            } else {
+                              // _updateWaterGlass(
+                              //     id: id, time: _selectedDateTimeToString);
+                            }
                             Navigator.pop(context);
                           },
                           color: lightWaterColor,
                           minWidth: 150.0,
                           height: 50.0,
                           child: Text(
-                            'Save',
+                            id == null ? 'Save' : 'Update',
                             style: TextStyle(color: whiteColor),
                           ),
                         ),
@@ -395,6 +446,61 @@ class _HomeScreenState extends State<HomeScreen> {
                   )),
                 ),
               ),
+            );
+          },
+        ),
+      );
+  openDeleteDialog(int id) => showDialog(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setState) {
+            var width = MediaQuery.of(context).size.width;
+            return AlertDialog(
+              shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(20.0))),
+              contentPadding: const EdgeInsets.only(top: 10.0),
+              title: const Center(child: Text('Delete Record')),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: width,
+                  height: 40.0,
+                  child: Center(
+                      child: Column(
+                    children: const [
+                      Text('Do you want to delete record'),
+                      Text('Deleted record cannot be recovered',
+                          style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              fontSize: 10,
+                              color: Colors.red)),
+                    ],
+                  )),
+                ),
+              ),
+              actions: [
+                //CANCEL Button
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                  },
+                  child: Text(
+                    'CANCEL',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                ),
+                //CREATE Button
+                TextButton(
+                  onPressed: () async {
+                    // await _deleteWaterGlass(id);
+
+                    Navigator.of(context, rootNavigator: true).pop('dialog');
+                  },
+                  child: const Text(
+                    'DELETE',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
             );
           },
         ),
