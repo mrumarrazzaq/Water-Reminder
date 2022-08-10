@@ -98,8 +98,8 @@ class _Screen1State extends State<Screen1> {
                       print('------------------------------------');
                     }
                     if (_weightController.text == '0' ||
-                        int.parse(_weightController.text) >= 20 ||
-                        int.parse(_weightController.text) <= 250) {
+                        int.parse(_weightController.text) < 20 ||
+                        int.parse(_weightController.text) > 255) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Enter weight range from 20-250 kg'),
