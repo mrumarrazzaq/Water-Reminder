@@ -87,15 +87,24 @@ class _HomeScreenState extends State<HomeScreen> {
         gender = 'Female';
       }
     });
-    double value = double.parse(weight) * 0.033 * 1000;
+    double value = int.parse(weight) * 0.033 * 1000;
     calculatedWaterInTake = value.round();
+    //------------------------------------------//
+    double newVal = calculatedWaterInTake / 250;
+    calculatedWaterInTake = newVal.round();
+    calculatedWaterInTake = calculatedWaterInTake * 250;
+    //------------------------------------------//
+
     interval = 200 / (calculatedWaterInTake / 250);
 
-    print('Weight                          : $weight');
-    print('Gender                          : $gender');
-    print('calculatedWaterInTake           : $calculatedWaterInTake');
-    print('interval                        : $interval');
-    print('inTakeLevel                     : $inTakeLevel');
+    if (kDebugMode) {
+      print('Weight                          : $weight');
+      print('Gender                          : $gender');
+      print('calculatedWaterInTake           : $calculatedWaterInTake');
+      print('interval                        : $interval');
+      print('inTakeLevel                     : $inTakeLevel');
+      print('newVal                     : ${newVal.round()}');
+    }
   }
 
   @override
@@ -546,7 +555,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextButton(
                   onPressed: () async {
                     await _deleteWaterGlass(id);
-                    inTakeLevel -= interval;
+                    if (inTakeLevel <= 250) {
+                      inTakeLevel = 0;
+                    } else {
+                      inTakeLevel -= interval;
+                    }
                     await storage.write(
                         key: 'inTakeLevel', value: inTakeLevel.toString());
 
