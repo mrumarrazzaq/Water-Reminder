@@ -1,11 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_4.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:water_reminder/constants.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
@@ -25,7 +25,12 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isTipVisible = false;
   bool _isLoading = true;
   List<Map<String, dynamic>> _dataCollection = [];
-
+  String weight = '60';
+  String gender = 'Male';
+  String idealWaterIntakeForMale = '3750'; //in ml    3750ml/250ml = 15  13.33
+  String idealWaterIntakeForFemale = '2750'; //in ml  2750ml/250ml = 11  18.18
+  int inTake = 0;
+  double inTakeLevel = 0.0;
   void _refreshData() async {
     final data = await SQLHelper.getRecords();
     setState(() {
@@ -47,14 +52,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _deleteWaterGlass(int id) async {
     await SQLHelper.deleteRecord(id);
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-      content: Text('Record Deleted Successfully'),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Record Deleted Successfully'),
+      ),
+    );
     _refreshData();
+  }
+
+  _readUserData() async {
+    if (kDebugMode) {
+      print('Fetching user data');
+    }
+    String? weightValue = await storage.read(key: 'weight');
+    String? genderValue = await storage.read(key: 'gender');
+    setState(() {
+      weight = weightValue!;
+      if (genderValue == 'Male') {
+        gender = 'Male';
+      } else {
+        gender = 'Female';
+      }
+    });
   }
 
   @override
   void initState() {
+    _readUserData();
     _refreshData();
     super.initState();
   }
@@ -142,7 +166,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: Text('Ideal Water Intake'),
                           ),
-                          const Text('2810ml', style: boldBlackTextStyle),
+                          Text(
+                              gender == 'Male'
+                                  ? '$idealWaterIntakeForMale ml'
+                                  : '$idealWaterIntakeForFemale ml',
+                              style: boldBlackTextStyle),
                         ],
                       ),
                     ),
@@ -191,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       Container(
                         width: 100,
-                        height: 100,
+                        height: inTakeLevel,
                         decoration: BoxDecoration(
                           // color: darkWaterColor,
                           gradient: LinearGradient(
@@ -218,14 +246,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           text: '', // default text style
                           children: <TextSpan>[
                             TextSpan(
-                              text: '800',
+                              text: '$inTake',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: darkWaterColor,
                                   fontSize: 35.0),
                             ),
                             TextSpan(
-                              text: '/2600',
+                              text: gender == 'Male'
+                                  ? '/$idealWaterIntakeForMale'
+                                  : '/$idealWaterIntakeForFemale',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: blackColor,
@@ -426,7 +456,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: MaterialButton(
                           onPressed: () {
                             if (id == null) {
-                              _addWaterGlass(time: _selectedDateTimeToString);
+                              if (inTakeLevel == idealWaterIntakeForMale ||
+                                  inTakeLevel == idealWaterIntakeForFemale) {
+                                _addWaterGlass(time: _selectedDateTimeToString);
+                                inTake = (_dataCollection.length) * 250;
+                                gender == 'Male'
+                                    ? inTakeLevel = inTakeLevel + 13.33
+                                    : inTakeLevel = inTakeLevel + 18.18;
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Water Limit Completed'),
+                                  ),
+                                );
+                              }
                             } else {
                               _updateWaterGlass(
                                   id: id, time: _selectedDateTimeToString);
@@ -492,7 +535,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextButton(
                   onPressed: () async {
                     await _deleteWaterGlass(id);
-
+                    gender == 'Male'
+                        ? inTakeLevel = inTakeLevel - 13.33
+                        : inTakeLevel = inTakeLevel - 18.18;
                     Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
                   child: const Text(
