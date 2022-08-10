@@ -26,36 +26,36 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _dataCollection = [];
 
-  // void _refreshData() async {
-  //   final data = await SQLHelper.getRecords();
-  //   setState(() {
-  //     _dataCollection = data;
-  //     _isLoading = false;
-  //   });
-  // }
-  //
-  // Future<void> _addWaterGlass({required String time}) async {
-  //   await SQLHelper.createRecord(time: time);
-  //   _refreshData();
-  // }
-  //
-  // Future<void> _updateWaterGlass(
-  //     {required int id, required String time}) async {
-  //   await SQLHelper.updateRecord(id: id, time: time);
-  //   _refreshData();
-  // }
-  //
-  // Future<void> _deleteWaterGlass(int id) async {
-  //   await SQLHelper.deleteRecord(id);
-  //   ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-  //     content: Text('Record Deleted Successfully'),
-  //   ));
-  //   _refreshData();
-  // }
+  void _refreshData() async {
+    final data = await SQLHelper.getRecords();
+    setState(() {
+      _dataCollection = data;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _addWaterGlass({required String time}) async {
+    await SQLHelper.createRecord(time: time);
+    _refreshData();
+  }
+
+  Future<void> _updateWaterGlass(
+      {required int id, required String time}) async {
+    await SQLHelper.updateRecord(id: id, time: time);
+    _refreshData();
+  }
+
+  Future<void> _deleteWaterGlass(int id) async {
+    await SQLHelper.deleteRecord(id);
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      content: Text('Record Deleted Successfully'),
+    ));
+    _refreshData();
+  }
 
   @override
   void initState() {
-    // _refreshData();
+    _refreshData();
     super.initState();
   }
 
@@ -426,10 +426,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: MaterialButton(
                           onPressed: () {
                             if (id == null) {
-                              // _addWaterGlass(time: _selectedDateTimeToString);
+                              _addWaterGlass(time: _selectedDateTimeToString);
                             } else {
-                              // _updateWaterGlass(
-                              //     id: id, time: _selectedDateTimeToString);
+                              _updateWaterGlass(
+                                  id: id, time: _selectedDateTimeToString);
                             }
                             Navigator.pop(context);
                           },
@@ -491,7 +491,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 //CREATE Button
                 TextButton(
                   onPressed: () async {
-                    // await _deleteWaterGlass(id);
+                    await _deleteWaterGlass(id);
 
                     Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
