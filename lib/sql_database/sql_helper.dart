@@ -62,4 +62,17 @@ class SQLHelper {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
+
+  static Future<void> dropTableIfExists({required String tableName}) async {
+    final db = await SQLHelper.db();
+    try {
+      await db.delete(tableName);
+      await db.close();
+      print('--------------------------------');
+      print('Table Drop successfully : $tableName');
+      await SQLHelper.db();
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an table: $err");
+    }
+  }
 }

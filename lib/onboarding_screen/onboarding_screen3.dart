@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:math';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:water_reminder/screens/dash_board.dart';
 import 'package:water_reminder/colors.dart';
@@ -20,6 +19,13 @@ class _Screen3State extends State<Screen3> {
   final TextEditingController _bedTimeController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final DateTime _selectedTime = DateTime.now();
+
+  @override
+  void initState() {
+    _wakeTimeController.text = '7:00 AM';
+    _bedTimeController.text = '10:00 PM';
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -137,8 +143,13 @@ class _Screen3State extends State<Screen3> {
                 child: MaterialButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      print(_wakeTimeController.text);
-                      print(_bedTimeController.text);
+                      if (kDebugMode) {
+                        print('------------------------------------');
+                        print(_wakeTimeController.text);
+                        print(_bedTimeController.text);
+                        print('------------------------------------');
+                      }
+
                       await storage.write(
                           key: 'wakeTime', value: _wakeTimeController.text);
                       await storage.write(

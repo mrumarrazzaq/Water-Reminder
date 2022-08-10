@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:water_reminder/constants.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:water_reminder/sql_database/sql_helper.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
@@ -260,26 +261,37 @@ class _SettingScreenState extends State<SettingScreen> {
                 borderRadius: BorderRadius.circular(30.0),
                 child: MaterialButton(
                   onPressed: () async {
-                    if (_weightController.text != previousWeightValue) {
-                      await storage.write(
-                          key: 'weight', value: _weightController.text);
-                      isUserChangeData = true;
-                    }
-                    if (selectedGenderValue != previousGenderValue) {
-                      String gender = '';
-                      selectedGenderValue == 0 ? gender = 'Male' : 'Female';
-                      await storage.write(key: 'gender', value: gender);
-                      isUserChangeData = true;
-                    }
-                    if (_wakeTimeController.text != previousWakeTimeValue) {
-                      await storage.write(
-                          key: 'wakeTime', value: _wakeTimeController.text);
-                      isUserChangeData = true;
-                    }
-                    if (_bedTimeController.text != previousBedTimeValue) {
-                      await storage.write(
-                          key: 'bedTime', value: _bedTimeController.text);
-                      isUserChangeData = true;
+                    if (_weightController.text == '0') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Invalid Weight'),
+                        ),
+                      );
+                    } else {
+                      if (_weightController.text != previousWeightValue) {
+                        await storage.write(
+                            key: 'weight', value: _weightController.text);
+                        await storage.delete(key: 'inTakeLevel');
+                        SQLHelper.dropTableIfExists(
+                            tableName: 'WaterReminders');
+                        isUserChangeData = true;
+                      }
+                      if (selectedGenderValue != previousGenderValue) {
+                        String gender = '';
+                        selectedGenderValue == 0 ? gender = 'Male' : 'Female';
+                        await storage.write(key: 'gender', value: gender);
+                        isUserChangeData = true;
+                      }
+                      if (_wakeTimeController.text != previousWakeTimeValue) {
+                        await storage.write(
+                            key: 'wakeTime', value: _wakeTimeController.text);
+                        isUserChangeData = true;
+                      }
+                      if (_bedTimeController.text != previousBedTimeValue) {
+                        await storage.write(
+                            key: 'bedTime', value: _bedTimeController.text);
+                        isUserChangeData = true;
+                      }
                     }
                     print('----------------------------');
                     print(isUserChangeData);

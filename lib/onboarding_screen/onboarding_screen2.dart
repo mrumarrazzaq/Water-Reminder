@@ -77,7 +77,9 @@ class _Screen2State extends State<Screen2> {
                   String gender;
                   selectedValue == 0 ? gender = 'Male' : gender = 'Female';
                   if (kDebugMode) {
+                    print('------------------------------------');
                     print(gender);
+                    print('------------------------------------');
                   }
                   await storage.write(key: 'gender', value: gender);
                   Navigator.push(

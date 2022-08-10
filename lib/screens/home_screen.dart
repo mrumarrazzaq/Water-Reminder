@@ -1,5 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:developer';
 
+import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -27,10 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _dataCollection = [];
   String weight = '60';
   String gender = 'Male';
-  String idealWaterIntakeForMale = '3750'; //in ml    3750ml/250ml = 15  13.33
-  String idealWaterIntakeForFemale = '2750'; //in ml  2750ml/250ml = 11  18.18
-  int inTake = 0;
+  String idealWaterIntakeForMale = '3700'; //in ml
+  String idealWaterIntakeForFemale = '2700'; //in ml
+
+  int calculatedWaterInTake = 0;
   double inTakeLevel = 0.0;
+  double interval = 0.0;
   void _refreshData() async {
     final data = await SQLHelper.getRecords();
     setState(() {
@@ -47,6 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _updateWaterGlass(
       {required int id, required String time}) async {
     await SQLHelper.updateRecord(id: id, time: time);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Record Updated Successfully'),
+      ),
+    );
     _refreshData();
   }
 
@@ -66,14 +76,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     String? weightValue = await storage.read(key: 'weight');
     String? genderValue = await storage.read(key: 'gender');
+    String? inTakeLevelValue = await storage.read(key: 'inTakeLevel') ?? '0';
+
     setState(() {
       weight = weightValue!;
+      inTakeLevel = double.parse(inTakeLevelValue);
       if (genderValue == 'Male') {
         gender = 'Male';
       } else {
         gender = 'Female';
       }
     });
+    double value = double.parse(weight) * 0.033 * 1000;
+    calculatedWaterInTake = value.round();
+    interval = 200 / (calculatedWaterInTake / 250);
+
+    print('Weight                          : $weight');
+    print('Gender                          : $gender');
+    print('calculatedWaterInTake           : $calculatedWaterInTake');
+    print('interval                        : $interval');
+    print('inTakeLevel                     : $inTakeLevel');
   }
 
   @override
@@ -166,10 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: Text('Ideal Water Intake'),
                           ),
-                          Text(
-                              gender == 'Male'
-                                  ? '$idealWaterIntakeForMale ml'
-                                  : '$idealWaterIntakeForFemale ml',
+                          Text('$calculatedWaterInTake',
                               style: boldBlackTextStyle),
                         ],
                       ),
@@ -188,7 +207,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: EdgeInsets.symmetric(vertical: 5.0),
                             child: Text('Ideal Water Intake'),
                           ),
-                          const Text('2400ml', style: boldBlackTextStyle),
+                          Text(
+                              gender == 'Male'
+                                  ? '$idealWaterIntakeForMale ml'
+                                  : '$idealWaterIntakeForFemale ml',
+                              style: boldBlackTextStyle),
                         ],
                       ),
                     ),
@@ -246,16 +269,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           text: '', // default text style
                           children: <TextSpan>[
                             TextSpan(
-                              text: '$inTake',
+                              text: '${_dataCollection.length * 250}',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: darkWaterColor,
                                   fontSize: 35.0),
                             ),
                             TextSpan(
-                              text: gender == 'Male'
-                                  ? '/$idealWaterIntakeForMale'
-                                  : '/$idealWaterIntakeForFemale',
+                              text: '/$calculatedWaterInTake',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: blackColor,
@@ -286,7 +307,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(10.0),
                         child: MaterialButton(
                           onPressed: () {
-                            openDialog(null);
+                            if (inTakeLevel <= 200) {
+                              openDialog(null);
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Water Limit Completed'),
+                                ),
+                              );
+                            }
                           },
                           color: lightWaterColor,
                           minWidth: 150.0,
@@ -331,10 +360,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         : ListView.builder(
                             itemCount: _dataCollection.length,
                             itemBuilder: (context, index) {
-                              print(
-                                  '_dataCollection.length ${_dataCollection.length}');
                               return _dataCollection.isEmpty
-                                  ? const Text('No record added')
+                                  ? const Center(
+                                      child: Text('No record added'),
+                                    )
                                   : SwipeActionCell(
                                       key: ObjectKey(
                                           _dataCollection[index]['createdAt']),
@@ -399,13 +428,9 @@ class _HomeScreenState extends State<HomeScreen> {
         context: context,
         builder: (context) => StatefulBuilder(
           builder: (context, setState) {
-            if (_selectedDateTime.hour > 12) {
-              _selectedDateTimeToString =
-                  '${_selectedDateTime.hour - 12} : ${_selectedDateTime.minute} PM';
-            } else {
-              _selectedDateTimeToString =
-                  '${_selectedDateTime.hour} : ${_selectedDateTime.minute} AM';
-            }
+            _selectedDateTimeToString =
+                formatDate(_selectedDateTime, [hh, ':', nn, ' ', am]);
+
             var width = MediaQuery.of(context).size.width;
             return AlertDialog(
               shape: const RoundedRectangleBorder(
@@ -436,13 +461,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             onDateTimeChanged: (time) {
                               setState(() {
                                 _selectedDateTime = time;
-                                if (_selectedDateTime.hour > 12) {
-                                  _selectedDateTimeToString =
-                                      '${_selectedDateTime.hour - 12} : ${_selectedDateTime.minute} PM';
-                                } else {
-                                  _selectedDateTimeToString =
-                                      '${_selectedDateTime.hour} : ${_selectedDateTime.minute} AM';
-                                }
+                                _selectedDateTimeToString =
+                                    formatDate(time, [hh, ':', nn, ' ', am]);
                                 log('Selected Time : $_selectedDateTimeToString');
                               });
                             },
@@ -454,22 +474,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         clipBehavior: Clip.antiAlias,
                         borderRadius: BorderRadius.circular(15.0),
                         child: MaterialButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (id == null) {
-                              if (inTakeLevel == idealWaterIntakeForMale ||
-                                  inTakeLevel == idealWaterIntakeForFemale) {
-                                _addWaterGlass(time: _selectedDateTimeToString);
-                                inTake = (_dataCollection.length) * 250;
-                                gender == 'Male'
-                                    ? inTakeLevel = inTakeLevel + 13.33
-                                    : inTakeLevel = inTakeLevel + 18.18;
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Water Limit Completed'),
-                                  ),
-                                );
-                              }
+                              _addWaterGlass(time: _selectedDateTimeToString);
+                              inTakeLevel += interval;
+                              await storage.write(
+                                  key: 'inTakeLevel',
+                                  value: inTakeLevel.toString());
                             } else {
                               _updateWaterGlass(
                                   id: id, time: _selectedDateTimeToString);
@@ -535,9 +546,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextButton(
                   onPressed: () async {
                     await _deleteWaterGlass(id);
-                    gender == 'Male'
-                        ? inTakeLevel = inTakeLevel - 13.33
-                        : inTakeLevel = inTakeLevel - 18.18;
+                    inTakeLevel -= interval;
+                    await storage.write(
+                        key: 'inTakeLevel', value: inTakeLevel.toString());
+
                     Navigator.of(context, rootNavigator: true).pop('dialog');
                   },
                   child: const Text(

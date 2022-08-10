@@ -93,16 +93,26 @@ class _Screen1State extends State<Screen1> {
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     if (kDebugMode) {
+                      print('------------------------------------');
                       print(_weightController.text);
+                      print('------------------------------------');
                     }
-                    await storage.write(
-                        key: 'weight', value: _weightController.text);
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Screen2(),
-                      ),
-                    );
+                    if (_weightController.text == '0') {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Invalid Weight'),
+                        ),
+                      );
+                    } else {
+                      await storage.write(
+                          key: 'weight', value: _weightController.text);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Screen2(),
+                        ),
+                      );
+                    }
                   }
                 },
                 height: 45.0,

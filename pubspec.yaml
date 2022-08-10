@@ -26,6 +26,7 @@ dependencies:
   flutter_chat_bubble: ^2.0.0
   sqflite: ^2.0.2
   flutter_swipe_action_cell: ^3.0.4
+  date_format: ^2.0.2
 
 
 dev_dependencies:
@@ -38,7 +39,7 @@ dev_dependencies:
 
 
 flutter_native_splash:
-  color: "#3498eb"
+  color: "#4fa8c5"
   image: assets/water_reminder_logo.png
 
 flutter:
