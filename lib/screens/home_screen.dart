@@ -2,18 +2,21 @@
 
 import 'dart:developer';
 
-import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_chat_bubble/bubble_type.dart';
+
+import 'package:date_format/date_format.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
+import 'package:flutter_chat_bubble/bubble_type.dart';
+import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:flutter_chat_bubble/clippers/chat_bubble_clipper_4.dart';
+import 'package:water_reminder/notification_api.dart';
+
+import 'package:water_reminder/style.dart';
 import 'package:water_reminder/colors.dart';
 import 'package:water_reminder/constants.dart';
-import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:water_reminder/sql_database/sql_helper.dart';
-import 'package:water_reminder/style.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -24,6 +27,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   DateTime _selectedDateTime = DateTime.now();
+  NotificationAPI notificationAPI = NotificationAPI();
   String _selectedDateTimeToString = '';
   bool _isTipVisible = false;
   bool _isLoading = true;
@@ -74,12 +78,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (kDebugMode) {
       print('Fetching user data');
     }
-    String? weightValue = await storage.read(key: 'weight');
-    String? genderValue = await storage.read(key: 'gender');
+    String? weightValue = await storage.read(key: 'weight') ?? '60';
+    String? genderValue = await storage.read(key: 'gender') ?? 'Male';
     String? inTakeLevelValue = await storage.read(key: 'inTakeLevel') ?? '0';
 
     setState(() {
-      weight = weightValue!;
+      weight = weightValue;
       inTakeLevel = double.parse(inTakeLevelValue);
       if (genderValue == 'Male') {
         gender = 'Male';
@@ -111,6 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     _readUserData();
     _refreshData();
+    NotificationAPI.init(initScheduled: true);
     super.initState();
   }
 
@@ -316,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(10.0),
                         child: MaterialButton(
                           onPressed: () {
-                            if (inTakeLevel <= 200) {
+                            if (inTakeLevel < 200) {
                               openDialog(null);
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -485,6 +490,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: MaterialButton(
                           onPressed: () async {
                             if (id == null) {
+                              NotificationAPI.showScheduledNotification(
+                                title: 'Water is life',
+                                body: 'Don\'t forget to drink water',
+                                payload: '',
+                                scheduledDate: _selectedDateTime.add(
+                                  const Duration(microseconds: 10),
+                                ),
+                              );
                               _addWaterGlass(time: _selectedDateTimeToString);
                               inTakeLevel += interval;
                               await storage.write(
@@ -555,10 +568,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextButton(
                   onPressed: () async {
                     await _deleteWaterGlass(id);
-                    if (inTakeLevel <= 250) {
-                      inTakeLevel = 0;
-                    } else {
+
+                    try {
                       inTakeLevel -= interval;
+                    } catch (e) {
+                      inTakeLevel = 0;
+                    }
+                    if (inTakeLevel.isNegative) {
+                      inTakeLevel = 0;
                     }
                     await storage.write(
                         key: 'inTakeLevel', value: inTakeLevel.toString());

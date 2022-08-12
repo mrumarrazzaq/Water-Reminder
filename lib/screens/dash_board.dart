@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:water_reminder/colors.dart';
-import 'package:water_reminder/screens/home_screen.dart';
 
 import 'setting_screen.dart';
+import 'package:water_reminder/colors.dart';
+import 'package:water_reminder/screens/home_screen.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({Key? key}) : super(key: key);

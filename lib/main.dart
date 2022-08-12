@@ -1,10 +1,19 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
 import 'package:water_reminder/constants.dart';
-import 'package:water_reminder/onboarding_screen/onboarding_screen1.dart';
 import 'package:water_reminder/screens/dash_board.dart';
+import 'package:water_reminder/onboarding_screen/onboarding_screen1.dart';
+import 'package:water_reminder/screens/home_screen.dart';
+
+import 'notification_api.dart';
+
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -36,9 +45,20 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     checkUserStatus();
+    NotificationAPI.init(initScheduled: true);
+    listenNotifications();
     super.initState();
   }
 
+  void listenNotifications() =>
+      NotificationAPI.onNotifications.stream.listen(onClickedNotification);
+
+  void onClickedNotification(String? payload) =>
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+      );
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -27,6 +27,12 @@ dependencies:
   sqflite: ^2.0.2
   flutter_swipe_action_cell: ^3.0.4
   date_format: ^2.0.2
+  #show local notification
+  flutter_local_notifications: ^9.4.0
+  #native timezone
+  flutter_native_timezone: ^2.0.0
+  #listen for notification
+  rxdart: ^0.27.1
 
 
 dev_dependencies:

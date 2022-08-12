@@ -2,9 +2,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+
+import 'package:google_fonts/google_fonts.dart';
+
 import 'package:water_reminder/screens/dash_board.dart';
 import 'package:water_reminder/colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:water_reminder/constants.dart';
 
 class Screen3 extends StatefulWidget {
