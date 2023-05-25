@@ -13,6 +13,7 @@ class NotificationAPI {
       android: AndroidNotificationDetails(
         'channel id 2',
         'channel name',
+
         channelDescription: 'channel description',
         importance: Importance.max,
         priority: Priority.max,
@@ -26,7 +27,7 @@ class NotificationAPI {
   }
 
   static Future init({bool initScheduled = false}) async {
-    const android = AndroidInitializationSettings('logo');
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iOS = IOSInitializationSettings();
     const settings = InitializationSettings(android: android, iOS: iOS);
 
@@ -51,7 +52,7 @@ class NotificationAPI {
   }
 
   static Future showScheduledNotification({
-    int id = 0,
+    required int id,
     String? title,
     String? body,
     String? payload,

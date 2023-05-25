@@ -2,7 +2,7 @@
     package="com.example.water_reminder">
     <uses-permission android:name="android.permission.VIBRATE"/>
    <application
-        android:label="Water Reminder"
+        android:label="H2One"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -16,6 +16,9 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
             >
+
+           
+
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

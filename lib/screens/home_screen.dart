@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:date_format/date_format.dart';
+import 'package:flutter_alarm_clock/flutter_alarm_clock.dart';
 import 'package:flutter_chat_bubble/chat_bubble.dart';
 import 'package:flutter_chat_bubble/bubble_type.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
@@ -26,7 +27,9 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  DateTime _selectedDateTime = DateTime.now();
+  DateTime _selectedDateTime = DateTime.now().add(const Duration(minutes: 1));
+  int _selectedTimeHr = DateTime.now().hour;
+  int _selectedTimeMin = DateTime.now().minute;
   NotificationAPI notificationAPI = NotificationAPI();
   String _selectedDateTimeToString = '';
   bool _isTipVisible = false;
@@ -156,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 Visibility(
-                  visible: _isTipVisible,
+                  visible: !_isTipVisible,
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: ChatBubble(
@@ -167,7 +170,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       backGroundColor: lightWaterColor,
                       child: Container(
                         constraints: BoxConstraints(
-                          maxWidth: MediaQuery.of(context).size.width * 0.7,
+                          maxWidth: MediaQuery.of(context).size.width * 0.6,
                         ),
                         child: const Text(
                           'Do not drink cold water immediately after hot water.',
@@ -309,11 +312,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 10.0),
                         child: Container(
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.5,
-                            ),
-                            child: const Text(
-                                'You have completed 30% of Daily Target.')),
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.5,
+                          ),
+                          child: Text(
+                              'You have completed ${((_dataCollection.length * 250) / (calculatedWaterInTake)) * 100} % of Daily Target.'),
+                        ),
                       ),
                       Material(
                         color: lightWaterColor,
@@ -322,6 +326,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: MaterialButton(
                           onPressed: () {
                             if (inTakeLevel < 200) {
+                              _selectedDateTime = DateTime.now()
+                                  .add(const Duration(minutes: 1));
+                              _selectedTimeHr = DateTime.now().hour;
+                              _selectedTimeMin = DateTime.now().minute;
+                              print(_selectedTimeHr);
+                              print(_selectedTimeMin);
                               openDialog(null);
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -470,11 +480,15 @@ class _HomeScreenState extends State<HomeScreen> {
                           data: const CupertinoThemeData(
                               brightness: Brightness.light),
                           child: CupertinoDatePicker(
-                            initialDateTime: DateTime.now(),
+                            initialDateTime:
+                                DateTime.now().add(const Duration(minutes: 1)),
                             mode: CupertinoDatePickerMode.time,
                             onDateTimeChanged: (time) {
                               setState(() {
                                 _selectedDateTime = time;
+                                _selectedTimeHr = time.hour;
+                                _selectedTimeMin = time.minute;
+                                _selectedTimeMin += 1;
                                 _selectedDateTimeToString =
                                     formatDate(time, [hh, ':', nn, ' ', am]);
                                 log('Selected Time : $_selectedDateTimeToString');
@@ -490,19 +504,24 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: MaterialButton(
                           onPressed: () async {
                             if (id == null) {
-                              NotificationAPI.showScheduledNotification(
+                              await NotificationAPI.showScheduledNotification(
+                                id: _selectedDateTime.minute,
                                 title: 'Water is life',
                                 body: 'Don\'t forget to drink water',
                                 payload: '',
                                 scheduledDate: _selectedDateTime.add(
-                                  const Duration(microseconds: 10),
+                                  const Duration(milliseconds: 500),
                                 ),
                               );
+                              // Create an alarm
+                              FlutterAlarmClock.createAlarm(
+                                  _selectedTimeHr, _selectedTimeMin);
                               _addWaterGlass(time: _selectedDateTimeToString);
                               inTakeLevel += interval;
                               await storage.write(
-                                  key: 'inTakeLevel',
-                                  value: inTakeLevel.toString());
+                                key: 'inTakeLevel',
+                                value: inTakeLevel.toString(),
+                              );
                             } else {
                               _updateWaterGlass(
                                   id: id, time: _selectedDateTimeToString);

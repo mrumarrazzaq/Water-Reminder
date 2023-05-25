@@ -1,15 +1,12 @@
 name: water_reminder
 description: A new Flutter project.
 
-
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
-
+publish_to: "none" # Remove this line if you wish to publish to pub.dev
 
 version: 1.0.0+1
 
 environment:
   sdk: ">=2.17.6 <3.0.0"
-
 
 dependencies:
   flutter:
@@ -34,23 +31,26 @@ dependencies:
   #listen for notification
   rxdart: ^0.27.1
 
+  flutter_alarm_clock: ^0.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-
   flutter_lints: ^2.0.0
   flutter_native_splash: ^2.2.7
+  flutter_launcher_icons:
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/logo.png"
 
 flutter_native_splash:
-  color: "#4fa8c5"
-  image: assets/water_reminder_logo.png
+  color: "#010b6a"
+  image: assets/logo.png
 
 flutter:
-
-
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
